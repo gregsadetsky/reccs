@@ -63,7 +63,7 @@
 
       const button = document.createElement('button');
       button.className = 'border border-zinc-500 bg-transparent hover:bg-pink-100 text-xs p-1 m-1 rounded';
-      button.innerHTML = 'hide images';
+      button.innerHTML = 'show images';
       button.addEventListener('click', () => {
         const show = button.innerHTML.includes('hide');
         button.innerHTML = `${show ? 'show' : 'hide'} images`;
@@ -99,13 +99,13 @@
 </head>
 <body>
 
-<div class="border-b border-gray-200 p-3" id="intro">  
+<div class="p-3 border-b border-gray-400" id="intro">  
   <p><i>RECCS</i> is <a href="https://greg.technology">my</a> attempt to organize/share all of the recommendations that I get for movies, music, books, etc. <a href="javascript:;" onclick="readMore(event)">read more</a>.</p>
 
   <div class="hidden" id="hiddenIntro">
-    <p>the system I used to have (prior to launching this in december 2024) when getting a recommendation was to 1) send an email to myself to not forget 2) at some point go through my inbox (you can see the real-time status of my inbox <a href="https://inbox.greg.technology">here</a>) and take those links and copy them to a folder 3) collect them in a folder, maybe to come to them at a later time.</p>
+    <p>the system I used to have (prior to launching this in december 2024) when getting a recommendation was to 1) send an email to myself to not forget 2) at some point go through my inbox (you can see the real-time status of my inbox <a href="https://inbox.greg.technology">here</a>) and take those links and copy them to a folder 3) stare at the folder, thinking that maybe I'll come to these at a later time.</p>
 
-    <p>I sometimes do come back to that folder, but there's also 1733 items in there now and if they're 2 hour movies and I watch 8 hour of movies per day that would still be more than a year. anyway none of this makes sense.</p>
+    <p>I sometimes do come back to that folder, but there's also 1733 items in there now and if 50% are 2 hour movies and I watch 8 hour of movies per day that would still be almost a year of content. anyway none of this makes sense.</p>
 
     <p>so yeah, I want to try this new system (the one you're on now). instead of self-emailing and storing away, I will add them here. maybe you can enjoy them too! or I will at some point. but at least, my inbox won't grow as much. maybe. who knows.</p>
 
@@ -115,12 +115,14 @@
   </div>
 </div>
 
-<div id="nmb_reccs" class="ml-3"></div>
-<div id='controls' class="border-b border-gray-200 pb-2 ml-2"></div>
+<div class="border-b border-gray-400 py-2 sticky top-0 bg-white z-10">
+  <div id="nmb_reccs" class="ml-3"></div>
+  <div id='controls' class="ml-2"></div>
+</div>
 
 {% for recc in all_reccs %}
   <div class="js-recc-container border-b border-gray-200 p-4 {{ recc.bg_color }} flex justify-between items-start gap-4">
-    <div class="flex-1">
+    <div class="flex-1 truncate">
       <a href="{{ recc.url }}" target="_blank" class="text-xl font-bold">
         {% if recc.og_title %}
           {{ recc.og_title }}
@@ -137,7 +139,7 @@
       {% endif %}
     </div>
     {% if recc.og_image_url %}
-      <div class="shrink-0 w-16 h-16">
+      <div class="shrink-0 w-16 h-16 hidden">
           <img loading="lazy" src="{{ recc.og_image_url }}" class="w-full h-full object-cover rounded">
       </div>
     {% endif %}

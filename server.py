@@ -101,7 +101,7 @@ def index():
     return render_template("index.html", all_reccs=reccs_out)
 
 
-@app.route("/submit", methods=["GET", "POST"])
+@app.route("/submit/", methods=["GET", "POST"])
 def submit():
     if request.method == "POST":
         password = request.form["password"]
@@ -128,7 +128,7 @@ def submit():
     return render_template("submit.html")
 
 
-@app.route("/admin")
+@app.route("/admin/")
 @auth.login_required
 def admin():
     reccs_out = get_all_recs_for_index()
