@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RECCS</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+  <style>
+    #intro p {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  </style>
+  <script>
+    function readMore(e) {
+      document.getElementById("hiddenIntro").classList.toggle("hidden");
+      // change the text from read more to read less and vice versa
+      if (document.getElementById("hiddenIntro").classList.contains("hidden")) {
+        e.target.innerHTML = "read more";
+      } else {
+        e.target.innerHTML = "read less";
+      }
+    }
+
+    const SITES_TO_SHOW_HIDE = {
+      'amazon': ['amazon.ca', 'amazon.com'],
+      'wikipedia': ['wikipedia.org'],
+      'youtube': ['youtube.com', 'youtu.be'],
+      'imdb': ['imdb.com'],
+    }
+
+    function updateCountOfReccs() {
+      // number of non hidden .js-recc-container divs
+      const reccContainers = document.getElementsByClassName('js-recc-container');
+      const count = Array.from(reccContainers).filter(c => c.style.display !== 'none').length;
+      document.getElementById('nmb_reccs').innerHTML = `${count} reccs`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updateCountOfReccs();
+
+      const controls = document.getElementById('controls');
+      
+      // add a button to go to a random site (that is currently visible)
+      const randomButton = document.createElement('button');
+      randomButton.className = 'border border-zinc-500 bg-transparent hover:bg-orange-100 text-xs p-1 m-1 rounded';
+      randomButton.innerHTML = 'random site!';
+      randomButton.addEventListener('click', () => {
+        const reccContainers = document.getElementsByClassName('js-recc-container');
+        const visibleContainers = Array.from(reccContainers).filter(c => c.style.display !== 'none');
+        if (visibleContainers.length > 0) {
+          const randomIndex = Math.floor(Math.random() * visibleContainers.length);
+          const url = visibleContainers[randomIndex].querySelector('a').href;
+          window.open(url, '_blank');
+        }
+      });
+      controls.appendChild(randomButton);
+
+      // add a vertical line between the buttons
+      let line = document.createElement('span');
+      line.innerHTML = '|';
+      controls.appendChild(line);
+
+      const button = document.createElement('button');
+      button.className = 'border border-zinc-500 bg-transparent hover:bg-pink-100 text-xs p-1 m-1 rounded';
+      button.innerHTML = 'hide images';
+      button.addEventListener('click', () => {
+        const show = button.innerHTML.includes('hide');
+        button.innerHTML = `${show ? 'show' : 'hide'} images`;
+        for (const img of document.getElementsByTagName('img')) {
+          img.parentElement.style.display = show ? 'none' : 'flex';
+        }
+      });
+      controls.appendChild(button);
+
+      line = document.createElement('span');
+      line.innerHTML = '|';
+      controls.appendChild(line);
+
+      for (const [site, domains] of Object.entries(SITES_TO_SHOW_HIDE)) {
+        const button = document.createElement('button');
+        button.className = 'border border-zinc-500 bg-transparent hover:bg-yellow-100 text-xs p-1 m-1 rounded';
+        button.innerHTML = `hide ${site}`;
+        button.addEventListener('click', () => {
+          const show = button.innerHTML.includes('hide');
+          button.innerHTML = `${show ? 'show' : 'hide'} ${site}`;
+          for (const a of document.getElementsByTagName('a')) {
+            if (domains.some(domain => a.href.includes(domain))) {
+              a.parentElement.parentElement.style.display = show ? 'none' : 'flex';
+            }
+          }
+          updateCountOfReccs();
+        });
+        controls.appendChild(button);
+      }
+    });
+
+  </script>
+</head>
+<body>
+
+<div class="border-b border-gray-200 p-3" id="intro">  
+  <p><i>RECCS</i> is <a href="https://greg.technology">my</a> attempt to organize/share all of the recommendations that I get for movies, music, books, etc. <a href="javascript:;" onclick="readMore(event)">read more</a>.</p>
+
+  <div class="hidden" id="hiddenIntro">
+    <p>the system I used to have (prior to launching this in december 2024) when getting a recommendation was to 1) send an email to myself to not forget 2) at some point go through my inbox (you can see the real-time status of my inbox <a href="https://inbox.greg.technology">here</a>) and take those links and copy them to a folder 3) collect them in a folder, maybe to come to them at a later time.</p>
+
+    <p>I sometimes do come back to that folder, but there's also 1733 items in there now and if they're 2 hour movies and I watch 8 hour of movies per day that would still be more than a year. anyway none of this makes sense.</p>
+
+    <p>so yeah, I want to try this new system (the one you're on now). instead of self-emailing and storing away, I will add them here. maybe you can enjoy them too! or I will at some point. but at least, my inbox won't grow as much. maybe. who knows.</p>
+
+    <p>BYE!</p>
+
+    <p>p.s. colors are random</p>
+  </div>
+</div>
+
+<div id="nmb_reccs" class="ml-3"></div>
+<div id='controls' class="border-b border-gray-200 pb-2 ml-2"></div>
+
+{% for recc in all_reccs %}
+  <div class="js-recc-container border-b border-gray-200 p-4 {{ recc.bg_color }} flex justify-between items-start gap-4">
+    <div class="flex-1">
+      <a href="{{ recc.url }}" target="_blank" class="text-xl font-bold">
+        {% if recc.og_title %}
+          {{ recc.og_title }}
+        {% else %}
+          {{ recc.url }}
+        {% endif %}
+      </a>
+      {% if recc.og_description %}
+        <p class="text-gray-600">{{ recc.og_description }}</p>
+      {% endif %}
+      <p class="text-sm text-gray-800 font-serif">{{ recc.timestamp }}</p>
+      {% if is_admin %}
+        <a href="{{ url_for('delete', recc_id=recc.rowid) }}" onclick="if(!window.confirm('Are you sure you want to delete this recc?')){return false;}">DELETE</a>
+      {% endif %}
+    </div>
+    {% if recc.og_image_url %}
+      <div class="shrink-0 w-16 h-16">
+          <img loading="lazy" src="{{ recc.og_image_url }}" class="w-full h-full object-cover rounded">
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}
+
+</body>
+</html>
