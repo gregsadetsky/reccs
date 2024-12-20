@@ -22,12 +22,14 @@
       }
     }
 
+    const MIST_BUTTON_NAME = 'misc.'
     const SITES_TO_SHOW_HIDE = {
       'amazon': ['amazon.ca', 'amazon.com'],
+      'imdb': ['imdb.com'],
       'wikipedia': ['wikipedia.org'],
       'youtube': ['youtube.com', 'youtu.be'],
-      'imdb': ['imdb.com'],
     }
+    SITES_TO_SHOW_HIDE[MIST_BUTTON_NAME] = []
 
     function updateCountOfReccs() {
       // number of non hidden .js-recc-container divs
@@ -43,8 +45,8 @@
       
       // add a button to go to a random site (that is currently visible)
       const randomButton = document.createElement('button');
-      randomButton.className = 'border border-zinc-500 bg-transparent hover:bg-orange-100 text-xs p-1 m-1 rounded';
-      randomButton.innerHTML = 'random site!';
+      randomButton.className = 'border border-zinc-500 bg-fuchsia-600 hover:bg-orange-100 text-white text-xs p-1 m-1 rounded';
+      randomButton.innerHTML = 'a random site ✨';
       randomButton.addEventListener('click', () => {
         const reccContainers = document.getElementsByClassName('js-recc-container');
         const visibleContainers = Array.from(reccContainers).filter(c => c.style.display !== 'none');
@@ -61,38 +63,82 @@
       line.innerHTML = '|';
       controls.appendChild(line);
 
-      const button = document.createElement('button');
-      button.className = 'border border-zinc-500 bg-transparent hover:bg-pink-100 text-xs p-1 m-1 rounded';
-      button.innerHTML = 'show images';
-      button.addEventListener('click', () => {
-        const show = button.innerHTML.includes('hide');
-        button.innerHTML = `${show ? 'show' : 'hide'} images`;
+      // add a checkbox instead to show images
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'show-images';
+      checkbox.className = 'm-1';
+      checkbox.addEventListener('change', () => {
+        const show = checkbox.checked;
         for (const img of document.getElementsByTagName('img')) {
-          img.parentElement.style.display = show ? 'none' : 'flex';
+          img.parentElement.style.display = show ? 'flex' : 'none';
         }
       });
-      controls.appendChild(button);
+      controls.appendChild(checkbox);
+      // add "show images"
+      const label = document.createElement('label');
+      label.htmlFor = 'show-images';
+      label.innerHTML = 'show images';
+      // cursor pointer
+      label.style.cursor = 'pointer';
+      // user select none it
+      label.style.userSelect = 'none';
+      label.className = 'text-xs mr-1 '
+      controls.appendChild(label);
 
       line = document.createElement('span');
       line.innerHTML = '|';
       controls.appendChild(line);
 
-      for (const [site, domains] of Object.entries(SITES_TO_SHOW_HIDE)) {
+      // Keep track of which sites are currently selected
+      const selectedSites = new Set();
+      for (const site in SITES_TO_SHOW_HIDE) {
         const button = document.createElement('button');
-        button.className = 'border border-zinc-500 bg-transparent hover:bg-yellow-100 text-xs p-1 m-1 rounded';
-        button.innerHTML = `hide ${site}`;
+        button.className = 'border border-zinc-500 bg-transparent hover:bg-pink-100 text-xs p-1 m-1 rounded';
+        button.innerHTML = site;
+        
         button.addEventListener('click', () => {
-          const show = button.innerHTML.includes('hide');
-          button.innerHTML = `${show ? 'show' : 'hide'} ${site}`;
-          // add a bg color when show is true
-          button.classList.toggle('bg-gray-300');
-          for (const a of document.getElementsByTagName('a')) {
-            if (domains.some(domain => a.href.includes(domain))) {
-              a.parentElement.parentElement.style.display = show ? 'none' : 'flex';
+          if (selectedSites.has(site)) {
+            selectedSites.delete(site);
+            button.style.backgroundColor = '';
+          } else {
+            selectedSites.add(site);
+            button.style.backgroundColor = 'pink';
+          }
+          
+          const reccContainers = document.getElementsByClassName('js-recc-container');          
+          for (const reccContainer of reccContainers) {
+            const url = reccContainer.querySelector('a').href;
+            if (selectedSites.size === 0) {
+              reccContainer.style.display = 'flex';
+            } else {
+              let shouldShow = false;
+
+              if (selectedSites.has(MIST_BUTTON_NAME)) {
+                // For misc, check if the URL is NOT from any of the defined sites
+                const isFromDefinedSites = Object.values(SITES_TO_SHOW_HIDE)
+                  .flat()
+                  .some(domain => url.includes(domain));
+                
+                if (!isFromDefinedSites) {
+                  shouldShow = true;
+                }
+              }
+              
+              // Check other selected sites (non-misc)
+              if (!shouldShow) {
+                shouldShow = Array.from(selectedSites)
+                  .filter(site => site !== MIST_BUTTON_NAME)
+                  .some(selectedSite => 
+                    SITES_TO_SHOW_HIDE[selectedSite].some(domain => url.includes(domain))
+                  );
+              }
+
+              reccContainer.style.display = shouldShow ? 'flex' : 'none';
             }
           }
           updateCountOfReccs();
-        });
+        });        
         controls.appendChild(button);
       }
     });
