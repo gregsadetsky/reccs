@@ -1014,3 +1014,13 @@ a:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(134 25 143 / var(--tw-bg-opacity, 1));
 }
+
+.active\:bg-fuchsia-800:active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(134 25 143 / var(--tw-bg-opacity, 1));
+}
+
+.active\:bg-pink-100:active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(252 231 243 / var(--tw-bg-opacity, 1));
+}
