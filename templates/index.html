@@ -172,6 +172,11 @@
 
 {% for recc in all_reccs %}
   <div class="js-recc-container border-b border-gray-200 p-4 {{ recc.bg_color }} flex justify-between items-start gap-4">
+    {% if recc.og_image_url %}
+      <div class="shrink-0 w-16 h-16 hidden">
+          <img loading="lazy" src="{{ recc.og_image_url }}" class="w-full h-full object-cover rounded">
+      </div>
+    {% endif %}
     <div class="flex-1 truncate">
       <a href="{{ recc.url }}" target="_blank" class="text-xl font-bold">
         {% if recc.og_title %}
@@ -181,18 +186,13 @@
         {% endif %}
       </a>
       {% if recc.og_description %}
-        <p class="text-gray-600">{{ recc.og_description }}</p>
+        <p class="text-gray-600 whitespace-normal">{{ recc.og_description }}</p>
       {% endif %}
       <p class="text-sm text-gray-800 font-serif">{{ recc.timestamp }}</p>
       {% if is_admin %}
         <a href="{{ url_for('delete', recc_id=recc.rowid) }}" onclick="if(!window.confirm('Are you sure you want to delete this recc?')){return false;}">DELETE</a>
       {% endif %}
     </div>
-    {% if recc.og_image_url %}
-      <div class="shrink-0 w-16 h-16 hidden">
-          <img loading="lazy" src="{{ recc.og_image_url }}" class="w-full h-full object-cover rounded">
-      </div>
-    {% endif %}
   </div>
 {% endfor %}
 
