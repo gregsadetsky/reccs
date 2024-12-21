@@ -110,10 +110,14 @@ def submit():
         url = request.form["url"]
         timestamp = datetime.now()
 
-        opengraph_data = get_title_description_image(url)
-        title = opengraph_data["title"]
-        description = opengraph_data["description"]
-        image = opengraph_data["image"]
+        opengraph_data = {}
+        try:
+            opengraph_data = get_title_description_image(url)
+        except:
+            pass
+        title = opengraph_data.get("title", "")
+        description = opengraph_data.get("description", "")
+        image = opengraph_data.get("image", "")
 
         db = get_db()
         db.execute(
